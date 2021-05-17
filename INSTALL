@@ -1,0 +1,4 @@
+Installation Instructions
+*************************
+
+$ ./bootstrap.sh && mkdir build && cd $_ && ../configure && make && sudo make install
