@@ -121,7 +121,6 @@ private:
 
   bool                      m_ripped ;
   FILE*                     m_fpInput ;
-  std::array<
   FILE*                     m_fpCallerOutput ;
   FILE*                     m_fpCalleeOutput ;
   u_int                     m_callerPort ;
