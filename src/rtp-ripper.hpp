@@ -62,6 +62,7 @@ public:
       m_payloadLength = 160 ;
       m_strName = szName;
       m_tsLastDtmf = 0;
+      m_idx = 0;
       m_fp = fp;
     }
     const string& getCodec(void) { return m_strCodecName; }
@@ -87,6 +88,10 @@ public:
     string                m_strCodecName;
 
     deque<Dtmf>           m_dequeDtmf;
+
+    uint8_t               m_buf[BUFSIZE * 160];
+    u_int16               m_idx;
+    u_int 
 
     FILE*                 m_fp;
 
