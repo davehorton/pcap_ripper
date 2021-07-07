@@ -12,7 +12,6 @@
 
 #include <boost/unordered_map.hpp>
 #include <deque>
-#include <array>
 
 #include "utils.h"
 #include "rtp.h"
@@ -22,7 +21,6 @@ using namespace std;
 #define LAST_WRITER_IS_CALLER (0)
 #define LAST_WRITER_IS_CALLEE (1)
 #define NO_LAST_WRITER (-1)
-#define BUFSIZE (100)
 
 struct Dtmf {
   Dtmf(uint32_t p, uint16_t d, char k): placement(p), duration(d), key(k) {}
@@ -62,7 +60,6 @@ public:
       m_payloadLength = 160 ;
       m_strName = szName;
       m_tsLastDtmf = 0;
-      m_idx = 0;
       m_fp = fp;
     }
     const string& getCodec(void) { return m_strCodecName; }
@@ -88,10 +85,6 @@ public:
     string                m_strCodecName;
 
     deque<Dtmf>           m_dequeDtmf;
-
-    uint8_t               m_buf[BUFSIZE * 160];
-    u_int16               m_idx;
-    u_int 
 
     FILE*                 m_fp;
 

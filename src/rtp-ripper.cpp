@@ -34,13 +34,30 @@ namespace {
     ripper->processRtp(pkthdr, packet);
   }
 
-  void generateSilencePackets(RtpRipper::RtpStream& rtpStream, int nPackets) {
-    uint8_t c = 0 == rtpStream.m_pt ? 0xFF : 0x55;
-    for (int i = 0; i < nPackets * rtpStream.m_payloadLength; i++) {
-      m_buf[m_idx++] = c;
-    }
-  }
+  void generateSilencePacket(RtpRipper::RtpStream& rtpStream, string& packet) {
+    void* data = calloc(rtpStream.m_payloadLength, 1);
+    switch(rtpStream.m_pt) {
+      case 0:
+        for (int i = 0; i < rtpStream.m_payloadLength; i += 2) {
+          memset((char *)(data) + i, 0xFF, 2);
+        }
+      break;
 
+      case 8:
+        for (int i = 0; i < rtpStream.m_payloadLength; i += 2) {
+          memset((char *)(data) + i, 0x55, 2);
+        }
+        break;
+
+      case 9:
+        for (int i = 0; i < rtpStream.m_payloadLength; i += 2) {
+          memset((char *)(data) + i, 0xFA, 2);
+        }
+        break;
+    }
+
+    packet.assign(static_cast<char*>(data), rtpStream.m_payloadLength);
+  }
 }
 
 RtpRipper::RtpRipper(int raw, const string& codecList, u_int callerPort, u_int calleePort, 
@@ -183,26 +200,6 @@ void RtpRipper::processRtp(const struct pcap_pkthdr* pkthdr, const u_char* packe
           cerr << rtpStream.m_strName << ": unknown payload type " << std::hex << pt << endl;
           return;
         }
-
-        /* is this our first packet?  If so, initialize some stuff */
-        if (0 == rtpStream.m_ssrc) {
-          rtpStream.m_ssrc = ssrc;
-          rtpStream.m_baseTimestamp = ts;
-
-          /* do we need to pad silence to catch up with the other channel? */
-          if (other.m_numPackets > 0) {
-            for (int i = 0; i < other.m_numPackets; i++) {
-              string packet;
-              generateSilencePacket(rtpStream, packet);
-              m_buf[m_idx++] = 
-              fwrite(static_cast<const void *>(packet.data()), packet.length(), 1, rtpStream.m_fp) ;
-              rtpStream.m_numPackets++;
-            }
-          }
-        }
-
-
-
 
         /* check if ssrc changed */
         if (ssrc != rtpStream.m_ssrc) {
