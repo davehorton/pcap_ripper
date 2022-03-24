@@ -216,6 +216,13 @@ void RtpRipper::processRtp(const struct pcap_pkthdr* pkthdr, const u_char* packe
         /* check if timestamp jumped, and if so insert silence */
         if (0 != rtpStream.m_ts && ts - rtpStream.m_ts > 160) {
           int num = (ts - rtpStream.m_ts) / 160 - 1 ;
+          //cerr << rtpStream.m_strName <<": ts " <<std::dec<< ts << " - " <<std::dec<< rtpStream.m_ts << " = " <<std::dec<< (ts-rtpStream.m_ts) << endl;
+          //cerr << "cur seq = "<< std::dec << seq << "  prev seq = " << std::dec << rtpStream.m_seq << endl;
+          //cerr <<"   injecting "<<std::dec <<num<<" silence" << endl;
+          if (num > 10000) {
+            cerr << rtpStream.m_strName << ": ignore mistemporal packet seq="<< std::dec << seq << ", ts="<< std::dec << ts <<endl;
+            return;
+          }
           for (int i = 0; i < num; i++) {
             string packet;
             generateSilencePacket(rtpStream, packet);
