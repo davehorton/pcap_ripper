@@ -112,10 +112,20 @@ int main(int argc, char** argv) {
         calleePt = boost::lexical_cast<int>(optarg);
         break;
       case 'd':
-        callerTePt = boost::lexical_cast<int>(optarg);
+        try {
+          callerTePt = boost::lexical_cast<int>(optarg);
+        }
+        catch (boost::bad_lexical_cast &) {
+          cerr << "Invalid caller telephony-event payload type will be ignored: " << optarg << endl ;
+        }
         break;
       case 'e':
-        calleeTePt = boost::lexical_cast<int>(optarg);
+        try {
+          calleeTePt = boost::lexical_cast<int>(optarg);
+        }
+        catch (boost::bad_lexical_cast &) {
+          cerr << "Invalid callee telephony-event payload type will be ignored: " << optarg << endl ;
+        }
         break;
       case 'c':
         codec = boost::to_upper_copy<std::string>(optarg);
