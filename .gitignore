@@ -15,5 +15,9 @@ deps/boost_1_65_0/stage/
 
 *.wav
 *.log
-
+*.o
+*.lo
+*.so.*
 .DS_Store
+*~
+.deps
