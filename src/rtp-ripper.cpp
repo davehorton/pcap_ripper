@@ -219,17 +219,21 @@ void RtpRipper::processRtp(const struct pcap_pkthdr* pkthdr, const u_char* packe
           //cerr << rtpStream.m_strName <<": ts " <<std::dec<< ts << " - " <<std::dec<< rtpStream.m_ts << " = " <<std::dec<< (ts-rtpStream.m_ts) << endl;
           //cerr << "cur seq = "<< std::dec << seq << "  prev seq = " << std::dec << rtpStream.m_seq << endl;
           //cerr <<"   injecting "<<std::dec <<num<<" silence" << endl;
+          // if the gap is more than 10 seconds, we either wrapped, or the timestamp reset, neither of which is supposed to happen  
           if (num > 10000) {
-            cerr << rtpStream.m_strName << ": ignore mistemporal packet seq="<< std::dec << seq << ", ts="<< std::dec << ts <<endl;
-            return;
+            cerr << rtpStream.m_strName << ": resync on mistemporal packet seq="<< std::dec << seq << ", ts="<< std::dec << ts <<endl;
+            num = 0;
           }
+          
           for (int i = 0; i < num; i++) {
             string packet;
             generateSilencePacket(rtpStream, packet);
             fwrite(static_cast<const void *>(packet.data()), packet.length(), 1, rtpStream.m_fp) ;
             rtpStream.m_numPackets++;
           }
-          //cerr << rtpStream.m_strName <<  ": generating " << std::dec << num << " silence packets due to timestamp jump" << endl;
+          if (num > 0) {
+            cerr << rtpStream.m_strName <<  ": generating " << std::dec << num << " silence packets due to timestamp jump" << endl;
+          }
         }
 
         /* insert silence at the beginning for stream that has not started */

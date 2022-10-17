@@ -14,9 +14,7 @@ docker run \
 
 docker run -it --rm --name pbuilder \
        --mount type=bind,source="$(pwd)/..",target=/app \
-       foo \
-       /bin/bash -c "cd /app/test ; ../build/pcap_ripper 
-
+       foo /bin/bash
 
 # ./bootstrap.sh && mkdir build && cd $_ && ../configure && make && sudo make install
 
