@@ -172,6 +172,7 @@ void RtpRipper::processRtp(const struct pcap_pkthdr* pkthdr, const u_char* packe
         bool marker = hdr->m ;
         int pt = hdr->pt ;
         u_int32 ssrc = ntohl(hdr->ssrc);
+        u_int32 silencePacketsToInsert = 0;
 
         /* handle RFC 2833 and unknown payload types */
         if (pt == rtpStream.m_te_pt) {
@@ -207,15 +208,18 @@ void RtpRipper::processRtp(const struct pcap_pkthdr* pkthdr, const u_char* packe
           if (0 != rtpStream.m_ts) rtpStream.m_offset += (rtpStream.m_ts - rtpStream.m_baseTimestamp);
           rtpStream.m_ssrc = ssrc;
           rtpStream.m_baseTimestamp = ts;
-          /*
+
+          silencePacketsToInsert = other.getPacketCounter() - 1;
+          if (silencePacketsToInsert < 0) silencePacketsToInsert = 0;
+          
           cerr << rtpStream.m_strName << ": ssrc changed to 0x" << std::hex << ssrc << ", offset is now " << 
-            std::dec << rtpStream.m_offset << ", seq is " << seq << endl;
-          */
+            std::dec << rtpStream.m_offset << ", seq is " << seq << ", inserting " << 
+            std::dec << silencePacketsToInsert << "silence packets " << endl;
         }
   
-        /* check if timestamp jumped, and if so insert silence */
-        if (0 != rtpStream.m_ts && ts - rtpStream.m_ts > 160) {
-          int num = (ts - rtpStream.m_ts) / 160 - 1 ;
+        /* check if we lost packets while ssrc changed or timestamp jumped, and if so insert silence */
+        if (silencePacketsToInsert > 0 || 0 != rtpStream.m_ts && ts - rtpStream.m_ts > 160) {
+          int num = silencePacketsToInsert > 0 ? silencePacketsToInsert  : (ts - rtpStream.m_ts) / 160 - 1 ;
           //cerr << rtpStream.m_strName <<": ts " <<std::dec<< ts << " - " <<std::dec<< rtpStream.m_ts << " = " <<std::dec<< (ts-rtpStream.m_ts) << endl;
           //cerr << "cur seq = "<< std::dec << seq << "  prev seq = " << std::dec << rtpStream.m_seq << endl;
           //cerr <<"   injecting "<<std::dec <<num<<" silence" << endl;
@@ -253,6 +257,10 @@ void RtpRipper::processRtp(const struct pcap_pkthdr* pkthdr, const u_char* packe
         rtpStream.m_numPackets++;
         rtpStream.m_ts = ts;
         rtpStream.m_seq = seq;
+
+        other.resetPacketCounter();
+        rtpStream.incrementPacketCounter();
+
       } ;
       if (destPort == m_callerPort) {
         _processPacket(m_fpCallerOutput, m_callerRtpStream, m_calleeRtpStream, 

@@ -61,6 +61,7 @@ public:
       m_strName = szName;
       m_tsLastDtmf = 0;
       m_fp = fp;
+      m_packetCounter = 0;
     }
     const string& getCodec(void) { return m_strCodecName; }
     void setCodec(const string& name) { m_strCodecName = name; }
@@ -69,6 +70,10 @@ public:
       m_pt = pt;
       setCodec(codecName); 
     }
+
+    u_int32 getPacketCounter(void) { return m_packetCounter; }
+    void resetPacketCounter(void) { m_packetCounter = 0; }
+    void incrementPacketCounter(void) { m_packetCounter++; }
 
     u_int32               m_offset;
     u_int32               m_baseTimestamp;
@@ -87,6 +92,8 @@ public:
     deque<Dtmf>           m_dequeDtmf;
 
     FILE*                 m_fp;
+
+    u_int32               m_packetCounter;
 
   private:
     RtpStream() {}
