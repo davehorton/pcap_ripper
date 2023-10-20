@@ -38,6 +38,7 @@ namespace {
     void* data = calloc(rtpStream.m_payloadLength, 1);
     switch(rtpStream.m_pt) {
       case 0:
+      case PT_UNDEFINED:  // AVDV-2438 - default to ulaw if we don't know
         for (int i = 0; i < rtpStream.m_payloadLength; i += 2) {
           memset((char *)(data) + i, 0xFF, 2);
         }
